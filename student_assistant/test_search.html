@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-container { max-width: 600px; margin: 0 auto; }
+        .search-box { width: 100%; padding: 15px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; }
+        .search-btn { padding: 15px 30px; background: #4f46e5; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+        .result { margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔍 Search Functionality Test</h1>
+        <p>Test the search API directly:</p>
+        
+        <input type="text" class="search-box" id="testSearch" placeholder="Enter search query (e.g., 'Python programming')">
+        <button class="search-btn" onclick="testSearch()">Test Search</button>
+        
+        <div class="result" id="result" style="display: none;">
+            <h3>Search Result:</h3>
+            <pre id="resultData"></pre>
+        </div>
+    </div>
+
+    <script>
+        function testSearch() {
+            const query = document.getElementById('testSearch').value.trim();
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            const resultDiv = document.getElementById('result');
+            const resultData = document.getElementById('resultData');
+            
+            resultData.textContent = 'Loading...';
+            resultDiv.style.display = 'block';
+
+            fetch('/api/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultData.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                resultData.textContent = 'Error: ' + error.message;
+            });
+        }
+
+        // Test suggestions
+        document.getElementById('testSearch').addEventListener('input', function(e) {
+            const value = e.target.value;
+            if (value.length < 2) return;
+
+            fetch(`/api/suggestions?q=${encodeURIComponent(value)}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Suggestions:', data);
+                })
+                .catch(error => {
+                    console.error('Suggestions error:', error);
+                });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⭐ My Favorites - Student Learning Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .title {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .favorites-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .favorite-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .favorite-card:hover {
+            transform: translateX(10px);
+        }
+
+        .favorite-info h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .favorite-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: white;
+            padding: 50px;
+        }
+
+        .empty-state h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">⬅️ Back to Home</a>
+
+    <div class="header">
+        <h1 class="title">⭐ My Favorites</h1>
+        <p>Your saved learning topics</p>
+    </div>
+
+    <div class="favorites-container">
+        {% if favorites %}
+            {% for favorite in favorites %}
+            <div class="favorite-card">
+                <div class="favorite-info">
+                    <h3>{{ favorite }}</h3>
+                    <p style="color: #666;">Click to continue learning about this topic</p>
+                </div>
+                <div class="favorite-actions">
+                    <a href="/search?q={{ favorite }}" class="btn btn-primary">📚 Learn</a>
+                    <button class="btn btn-danger" onclick="removeFavorite('{{ favorite }}')">🗑️ Remove</button>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <h2>No favorites yet! 🤔</h2>
+                <p>Start exploring topics and add them to your favorites for quick access.</p>
+                <a href="/" class="btn btn-primary" style="margin-top: 20px; display: inline-block;">🔍 Explore Topics</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        async function removeFavorite(topic) {
+            try {
+                const response = await fetch('/api/toggle_favorite', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ topic: topic })
+                });
+                
+                if (response.ok) {
+                    location.reload();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html> 

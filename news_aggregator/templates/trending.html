@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📈 Trending News - News Aggregator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .trending-header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 60px auto 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 800px;
+        }
+
+        .trending-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .trending-title {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .trending-subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            background: white;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .btn-refresh {
+            background: #28a745;
+            color: white;
+        }
+
+        .articles-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .article-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .article-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .article-badges {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .article-topic {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .article-source {
+            background: #28a745;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .trending-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .article-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .article-title a {
+            color: #333;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .article-title a:hover {
+            color: #667eea;
+        }
+
+        .article-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #666;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .article-date {
+            font-weight: 500;
+        }
+
+        .article-author {
+            font-style: italic;
+        }
+
+        .article-summary {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .article-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .read-more {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .read-more:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .topic-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .topic-link:hover {
+            text-decoration: underline;
+        }
+
+        .no-articles {
+            text-align: center;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1em;
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .back-btn {
+                position: relative;
+                top: 0;
+                left: 0;
+                margin-bottom: 20px;
+                display: inline-block;
+            }
+
+            .trending-header {
+                margin-top: 20px;
+                padding: 20px;
+            }
+
+            .trending-title {
+                font-size: 2em;
+            }
+
+            .stats-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .articles-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .article-card {
+                padding: 20px;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Animation for new articles */
+        .article-card.fade-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">⬅️ Back to Home</a>
+
+    <div class="trending-header">
+        <div class="trending-icon">📈</div>
+        <h1 class="trending-title">Trending News</h1>
+        <p class="trending-subtitle">Latest articles from all topics</p>
+        
+        <div class="stats-container">
+            <div class="stat">
+                <div class="stat-number">{{ total }}</div>
+                <div class="stat-label">Trending Articles</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">5</div>
+                <div class="stat-label">News Topics</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-refresh" onclick="refreshTrending()">🔄 Refresh</button>
+        <a href="/search" class="btn">🔍 Search Articles</a>
+        <a href="/favorites" class="btn">⭐ Your Favorites</a>
+    </div>
+
+    <div class="articles-container">
+        {% if articles %}
+            {% for article in articles %}
+            <div class="article-card">
+                <div class="article-badges">
+                    <span class="article-topic">{{ article.topic_name }}</span>
+                    <span class="article-source">{{ article.feed_name }}</span>
+                    {% if loop.index <= 5 %}
+                    <span class="trending-badge">🔥 Hot</span>
+                    {% endif %}
+                </div>
+                
+                <h2 class="article-title">
+                    <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer">
+                        {{ article.title }}
+                    </a>
+                </h2>
+                
+                <div class="article-meta">
+                    <span class="article-date">📅 {{ article.published }}</span>
+                    <span class="article-author">✍️ {{ article.author }}</span>
+                </div>
+                
+                <p class="article-summary">{{ article.summary }}</p>
+                
+                <div class="article-actions">
+                    <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer" class="read-more">
+                        📖 Read Full Article
+                    </a>
+                    <a href="/topic/{{ article.topic }}" class="topic-link">
+                        📂 More {{ article.topic_name }}
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-articles">
+                <h2>📭 No trending articles available</h2>
+                <p>We couldn't fetch trending articles right now. Please try refreshing the page.</p>
+                <button class="btn btn-refresh" onclick="refreshTrending()" style="margin-top: 20px;">🔄 Try Again</button>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        async function refreshTrending() {
+            const refreshBtn = document.querySelector('.btn-refresh');
+            
+            // Show loading state
+            refreshBtn.textContent = '🔄 Loading...';
+            refreshBtn.disabled = true;
+            
+            try {
+                // Refresh the page to get new trending articles
+                location.reload();
+            } catch (error) {
+                console.error('Error refreshing:', error);
+            } finally {
+                refreshBtn.textContent = '🔄 Refresh';
+                refreshBtn.disabled = false;
+            }
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'r' && event.ctrlKey) {
+                event.preventDefault();
+                refreshTrending();
+            }
+            if (event.key === 'Escape') {
+                window.location.href = '/';
+            }
+        });
+
+        // Auto-refresh every 10 minutes
+        setInterval(refreshTrending, 10 * 60 * 1000);
+
+        // Add entrance animation
+        window.addEventListener('load', function() {
+            const articles = document.querySelectorAll('.article-card');
+            articles.forEach((article, index) => {
+                setTimeout(() => {
+                    article.classList.add('fade-in');
+                }, index * 100);
+            });
+        });
+
+        // Add real-time timestamp updates
+        function updateTimestamps() {
+            const dateElements = document.querySelectorAll('.article-date');
+            dateElements.forEach(element => {
+                // This would require more complex logic to convert and update timestamps
+                // For now, we'll just keep the original format
+            });
+        }
+
+        // Update timestamps every minute
+        setInterval(updateTimestamps, 60000);
+    </script>
+</body>
+</html> 

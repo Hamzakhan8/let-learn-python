@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category_info.name }} - Student Learning Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, {{ category_info.color }}44, {{ category_info.color }}88);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .category-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .category-title {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .topics-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .topic-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .topic-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .topic-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .topic-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: {{ category_info.color }};
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">⬅️ Back to Home</a>
+
+    <div class="header">
+        <div class="category-icon">{{ category_info.icon }}</div>
+        <h1 class="category-title">{{ category_info.name }}</h1>
+        <p>Explore topics in {{ category_info.name.lower() }}</p>
+    </div>
+
+    <div class="topics-grid">
+        {% for topic in sample_topics %}
+        <div class="topic-card" onclick="window.location.href='/search?q={{ topic }}'">
+            <h3 class="topic-title">{{ topic.title() }}</h3>
+            <p class="topic-description">Learn about {{ topic }} with educational videos and study materials.</p>
+            <a href="/search?q={{ topic }}" class="btn">🚀 Start Learning</a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html> 

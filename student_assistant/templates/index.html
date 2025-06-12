@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Learning Assistant - AI Powered</title>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --secondary-color: #06b6d4;
+            --accent-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --success-color: #10b981;
+            
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --text-white: #ffffff;
+            
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            
+            --border-radius: 12px;
+            --border-radius-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 2rem 1rem;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* User Stats */
+        .user-stats {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+        }
+
+        .user-stats h4 {
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        /* Search Container */
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            padding: 0 1rem;
+            position: relative;
+        }
+
+        .search-form {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 1.25rem 1.5rem;
+            padding-right: 140px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            font-size: 1.1rem;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            outline: none;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .search-box:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .search-controls {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .voice-btn, .search-btn {
+            padding: 12px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .voice-btn {
+            background: var(--accent-color);
+            color: white;
+            width: 44px;
+            height: 44px;
+        }
+
+        .search-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+        }
+
+        .voice-btn:hover, .search-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .voice-btn.listening {
+            background: var(--error-color);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Search Suggestions */
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .suggestion-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Course Popup */
+        .course-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .popup-content {
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius-lg);
+            max-width: 900px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .popup-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .popup-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .course-card {
+            background: var(--bg-tertiary);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .course-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .course-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .course-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+        }
+
+        .course-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Categories Grid */
+        .categories-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .category-card {
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--category-color, var(--primary-color));
+        }
+
+        .category-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--category-color, var(--primary-color));
+        }
+
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .category-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        /* AI Chat */
+        .ai-chat {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-xl);
+            display: none;
+            flex-direction: column;
+            z-index: 1500;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .message {
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background: var(--primary-color);
+            color: white;
+            align-self: flex-end;
+        }
+
+        .message.ai {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            align-self: flex-start;
+        }
+
+        .chat-input {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .chat-input button {
+            padding: 0.75rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+        }
+
+        .chat-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            z-index: 1400;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .user-stats {
+                position: static;
+                margin: 1rem;
+                margin-bottom: 2rem;
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+            }
+            
+            .ai-chat {
+                width: calc(100% - 40px);
+                height: 400px;
+                bottom: 10px;
+                right: 20px;
+            }
+            
+            .categories-container {
+                grid-template-columns: 1fr;
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon" id="theme-icon"></i>
+    </button>
+
+        <!-- User Stats -->
+    <div class="user-stats">
+        <h4><i class="fas fa-user"></i> Your Progress</h4>
+        <div class="stat-item">
+            <span>Points:</span>
+            <span id="user-points">{{ user_data.points or 0 }}</span>
+        </div>
+        <div class="stat-item">
+            <span>Level:</span>
+            <span id="user-level">{{ user_data.level or 1 }}</span>
+        </div>
+        <div class="stat-item">
+            <span>Searches:</span>
+            <span id="search-count">{{ user_data.search_count or 0 }}</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <h1><i class="fas fa-graduation-cap"></i> AI Learning Assistant</h1>
+        <p>Discover, Learn, and Excel with AI-Powered Education</p>
+        <p class="motto">Your personalized learning companion for the digital age</p>
+    </div>
+
+    <!-- Search Container -->
+    <div class="search-container">
+        <form class="search-form" onsubmit="handleSearch(event)">
+            <input type="text" class="search-box" id="searchBox" 
+                   placeholder="Ask me anything... (Try: 'How does photosynthesis work?')"
+                   oninput="handleSearchInput(this.value)"
+                   autocomplete="off">
+            <div class="search-controls">
+                <button type="button" class="voice-btn" onclick="toggleVoiceSearch()" title="Voice Search">
+                    <i class="fas fa-microphone" id="voice-icon"></i>
+                </button>
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </form>
+        
+        <div class="search-suggestions" id="searchSuggestions"></div>
+    </div>
+
+    <!-- Categories Grid -->
+    <div class="categories-container">
+        {% for category_key, category_data in categories.items() %}
+        <div class="category-card" onclick="searchCategory('{{ category_key }}')" 
+             style="--category-color: {{ category_data.color }}">
+            <i class="category-icon {{ category_data.icon }}"></i>
+            <h3 class="category-title">{{ category_data.name }}</h3>
+            <p class="category-description">{{ category_data.description }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Course Popup -->
+    <div class="course-popup" id="coursePopup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h2 id="popup-title">Course Recommendations</h2>
+                <button class="popup-close" onclick="closeCoursePopup()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="course-grid" id="courseGrid">
+                <!-- Courses will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chat -->
+    <button class="chat-toggle" onclick="toggleChat()">
+        <i class="fas fa-comments"></i>
+    </button>
+
+    <div class="ai-chat" id="aiChat">
+        <div class="chat-header">
+            <h4><i class="fas fa-robot"></i> AI Tutor</h4>
+            <button onclick="toggleChat()" style="background: none; border: none; color: white; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+            </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai">
+                <i class="fas fa-robot"></i> Hi! I'm your AI tutor. Ask me anything about your studies!
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Ask your AI tutor..." 
+                   onkeypress="handleChatKeypress(event)">
+            <button onclick="sendChatMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Socket.IO
+        const socket = io();
+        let isListening = false;
+        let recognition = null;
+
+        // Theme Management
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            const currentTheme = body.getAttribute('data-theme');
+            
+            if (currentTheme === 'light') {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+                themeIcon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+        document.getElementById('theme-icon').className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+
+        // Voice Search
+        function initVoiceSearch() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = function() {
+                    isListening = true;
+                    document.querySelector('.voice-btn').classList.add('listening');
+                    document.getElementById('voice-icon').className = 'fas fa-stop';
+                };
+
+                recognition.onend = function() {
+                    isListening = false;
+                    document.querySelector('.voice-btn').classList.remove('listening');
+                    document.getElementById('voice-icon').className = 'fas fa-microphone';
+                };
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('searchBox').value = transcript;
+                    handleSearch(null, transcript);
+                };
+            }
+        }
+
+        function toggleVoiceSearch() {
+            if (!recognition) {
+                alert('Voice search is not supported in your browser.');
+                return;
+            }
+
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        }
+
+        // Search Functionality
+        function handleSearch(event, query = null) {
+            if (event) event.preventDefault();
+            
+            const searchQuery = query || document.getElementById('searchBox').value.trim();
+            if (!searchQuery) return;
+
+            // Show loading state
+            const searchBtn = document.querySelector('.search-btn');
+            const originalContent = searchBtn.innerHTML;
+            searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            // Send search request
+            fetch('/api/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: searchQuery })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showCoursePopup(data.courses, searchQuery);
+                updateUserStats(data.user_data);
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                alert('Search failed. Please try again.');
+            })
+            .finally(() => {
+                searchBtn.innerHTML = originalContent;
+            });
+        }
+
+        function handleSearchInput(value) {
+            if (value.length < 2) {
+                hideSuggestions();
+                return;
+            }
+
+            // Get suggestions
+            fetch(`/api/suggestions?q=${encodeURIComponent(value)}`)
+                .then(response => response.json())
+                .then(data => {
+                    showSuggestions(data.suggestions);
+                })
+                .catch(error => console.error('Suggestions error:', error));
+        }
+
+        function showSuggestions(suggestions) {
+            const suggestionsDiv = document.getElementById('searchSuggestions');
+            if (suggestions.length === 0) {
+                hideSuggestions();
+                return;
+            }
+
+            suggestionsDiv.innerHTML = suggestions.map(suggestion => 
+                `<div class="suggestion-item" onclick="selectSuggestion('${suggestion}')">${suggestion}</div>`
+            ).join('');
+            suggestionsDiv.style.display = 'block';
+        }
+
+        function hideSuggestions() {
+            document.getElementById('searchSuggestions').style.display = 'none';
+        }
+
+        function selectSuggestion(suggestion) {
+            document.getElementById('searchBox').value = suggestion;
+            hideSuggestions();
+            handleSearch(null, suggestion);
+        }
+
+        function searchCategory(category) {
+            const categoryData = {{ categories | tojsonfilter }};
+            const categoryInfo = categoryData[category];
+            if (categoryInfo && categoryInfo.keywords && categoryInfo.keywords.length > 0) {
+                const query = categoryInfo.keywords[0];
+                document.getElementById('searchBox').value = query;
+                handleSearch(null, query);
+            }
+        }
+
+        // Course Popup
+        function showCoursePopup(courses, query) {
+            const popup = document.getElementById('coursePopup');
+            const title = document.getElementById('popup-title');
+            const grid = document.getElementById('courseGrid');
+
+            title.textContent = `Courses for: "${query}"`;
+            
+            if (courses && courses.length > 0) {
+                grid.innerHTML = courses.map(course => `
+                    <div class="course-card" onclick="viewCourse('${course.id}')">
+                        <h4 class="course-title">${course.title}</h4>
+                        <p class="course-description">${course.description}</p>
+                        <div class="course-meta">
+                            <div class="course-rating">
+                                <i class="fas fa-star" style="color: #f59e0b;"></i>
+                                <span>${course.rating}</span>
+                            </div>
+                            <span>${course.duration}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                grid.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No courses found. Try a different search term.</p>';
+            }
+
+            popup.style.display = 'flex';
+        }
+
+        function closeCoursePopup() {
+            document.getElementById('coursePopup').style.display = 'none';
+        }
+
+        function viewCourse(courseId) {
+            // Track course view
+            fetch('/api/track', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    action: 'course_view',
+                    course_id: courseId 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateUserStats(data.user_data);
+            });
+
+            alert(`Opening course: ${courseId}\n\nThis would normally open the course content or redirect to the course page.`);
+        }
+
+        // AI Chat
+        function toggleChat() {
+            const chat = document.getElementById('aiChat');
+            const toggle = document.querySelector('.chat-toggle');
+            
+            if (chat.style.display === 'flex') {
+                chat.style.display = 'none';
+                toggle.style.display = 'flex';
+            } else {
+                chat.style.display = 'flex';
+                toggle.style.display = 'none';
+            }
+        }
+
+        function handleChatKeypress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addChatMessage(message, 'user');
+            input.value = '';
+
+            // Send to AI
+            socket.emit('chat_message', { message: message });
+        }
+
+        function addChatMessage(message, sender) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            if (sender === 'ai') {
+                messageDiv.innerHTML = `<i class="fas fa-robot"></i> ${message}`;
+            } else {
+                messageDiv.innerHTML = `<i class="fas fa-user"></i> ${message}`;
+            }
+            
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Socket.IO Events
+        socket.on('ai_response', function(data) {
+            addChatMessage(data.message, 'ai');
+            if (data.user_data) {
+                updateUserStats(data.user_data);
+            }
+        });
+
+        socket.on('user_stats_update', function(data) {
+            updateUserStats(data);
+        });
+
+        // Update User Stats
+        function updateUserStats(userData) {
+            if (userData) {
+                document.getElementById('user-points').textContent = userData.points || 0;
+                document.getElementById('user-level').textContent = userData.level || 1;
+                document.getElementById('search-count').textContent = userData.search_count || 0;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initVoiceSearch();
+            
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.search-container')) {
+                    hideSuggestions();
+                }
+            });
+
+            // Close popup when clicking outside
+            document.getElementById('coursePopup').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeCoursePopup();
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(event) {
+                if (event.key === '/' && !event.target.matches('input, textarea')) {
+                    event.preventDefault();
+                    document.getElementById('searchBox').focus();
+                }
+                
+                if (event.key === 'Escape') {
+                    hideSuggestions();
+                    closeCoursePopup();
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⭐ Your Favorites - News Aggregator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .favorites-header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 60px auto 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 800px;
+        }
+
+        .favorites-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .favorites-title {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .favorites-subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .favorites-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .topic-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .topic-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .favorite-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .topic-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .topic-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .topic-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .topic-sources {
+            margin-bottom: 20px;
+        }
+
+        .source-badge {
+            display: inline-block;
+            background: #f0f0f0;
+            color: #555;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 15px;
+            font-size: 0.8em;
+        }
+
+        .topic-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-remove {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-remove:hover {
+            background: #ff5252;
+        }
+
+        .no-favorites {
+            text-align: center;
+            background: white;
+            border-radius: 20px;
+            padding: 60px 30px;
+            color: #666;
+            font-size: 1.2em;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .no-favorites h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .no-favorites .btn {
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .back-btn {
+                position: relative;
+                top: 0;
+                left: 0;
+                margin-bottom: 20px;
+                display: inline-block;
+            }
+
+            .favorites-header {
+                margin-top: 20px;
+                padding: 20px;
+            }
+
+            .favorites-title {
+                font-size: 2em;
+            }
+
+            .favorites-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .topic-card {
+                padding: 20px;
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">⬅️ Back to Home</a>
+
+    <div class="favorites-header">
+        <div class="favorites-icon">⭐</div>
+        <h1 class="favorites-title">Your Favorites</h1>
+        <p class="favorites-subtitle">Quick access to your preferred news topics</p>
+    </div>
+
+    <div class="favorites-container">
+        {% if favorite_topics %}
+            <div class="favorites-grid">
+                {% for topic_key, topic_data in favorite_topics.items() %}
+                <div class="topic-card">
+                    <div class="favorite-badge">❤️ Favorite</div>
+                    
+                    <span class="topic-icon">
+                        {% if topic_key == 'technology' %}💻
+                        {% elif topic_key == 'programming' %}👨‍💻
+                        {% elif topic_key == 'science' %}🔬
+                        {% elif topic_key == 'business' %}💼
+                        {% elif topic_key == 'world' %}🌍
+                        {% else %}📰
+                        {% endif %}
+                    </span>
+                    
+                    <h2 class="topic-title">{{ topic_data.name }}</h2>
+                    
+                    <p class="topic-description">
+                        {% if topic_key == 'technology' %}
+                            Latest technology news, gadgets, and innovation updates
+                        {% elif topic_key == 'programming' %}
+                            Programming tutorials, developer news, and coding insights
+                        {% elif topic_key == 'science' %}
+                            Scientific discoveries, research, and space exploration
+                        {% elif topic_key == 'business' %}
+                            Business news, market updates, and financial insights
+                        {% elif topic_key == 'world' %}
+                            Global news, international affairs, and world events
+                        {% else %}
+                            Stay updated with the latest news and articles
+                        {% endif %}
+                    </p>
+                    
+                    <div class="topic-sources">
+                        <strong>Sources:</strong><br>
+                        {% for feed in topic_data.feeds %}
+                            <span class="source-badge">{{ feed.name }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="topic-actions">
+                        <a href="/topic/{{ topic_key }}" class="btn btn-primary">📖 Read News</a>
+                        <button class="btn btn-remove" onclick="removeFavorite('{{ topic_key }}', this)">
+                            🗑️ Remove
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-favorites">
+                <h2>📭 No Favorites Yet</h2>
+                <p>You haven't added any topics to your favorites yet.</p>
+                <p>Browse topics and click "⭐ Add to Favorites" to save your preferred news sources!</p>
+                
+                <a href="/" class="btn btn-primary">🏠 Browse Topics</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        async function removeFavorite(topic, button) {
+            if (!confirm(`Remove ${topic} from your favorites?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/toggle_favorite', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ topic: topic })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && !data.is_favorite) {
+                    // Remove the card with animation
+                    const card = button.closest('.topic-card');
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.transform = 'translateY(-20px)';
+                    card.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        card.remove();
+                        
+                        // Check if no favorites left
+                        const grid = document.querySelector('.favorites-grid');
+                        if (grid && grid.children.length === 0) {
+                            location.reload();
+                        }
+                    }, 500);
+                }
+            } catch (error) {
+                console.error('Error removing favorite:', error);
+                alert('Error removing favorite. Please try again.');
+            }
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                window.location.href = '/';
+            }
+        });
+
+        // Add entrance animation
+        window.addEventListener('load', function() {
+            const cards = document.querySelectorAll('.topic-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('fade-in');
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html> 

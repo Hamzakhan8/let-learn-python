@@ -1,0 +1,7 @@
+Flask>=3.1.1
+Flask-SocketIO>=5.3.6
+requests>=2.31.0
+wikipedia>=1.4.0
+python-socketio>=5.9.0
+python-engineio>=4.7.1
+google-api-python-client>=2.108.0 

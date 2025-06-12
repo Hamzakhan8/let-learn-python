@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Search Results - News Aggregator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .search-header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 60px auto 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 800px;
+        }
+
+        .search-header h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .search-box-container {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #667eea;
+            border-radius: 25px;
+            font-size: 1.1em;
+            outline: none;
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .search-info {
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .results-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .results-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .article-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .article-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .article-topic {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-weight: bold;
+        }
+
+        .article-source {
+            background: #28a745;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .article-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            padding-right: 80px;
+        }
+
+        .article-title a {
+            color: #333;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .article-title a:hover {
+            color: #667eea;
+        }
+
+        .article-summary {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .article-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .read-more {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .read-more:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .topic-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .topic-link:hover {
+            text-decoration: underline;
+        }
+
+        .no-results {
+            text-align: center;
+            background: white;
+            border-radius: 20px;
+            padding: 60px 30px;
+            color: #666;
+            font-size: 1.2em;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .no-results h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .search-suggestions {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .search-suggestions h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .suggestion-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .suggestion-tag {
+            background: #f0f0f0;
+            color: #555;
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .suggestion-tag:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .back-btn {
+                position: relative;
+                top: 0;
+                left: 0;
+                margin-bottom: 20px;
+                display: inline-block;
+            }
+
+            .search-header {
+                margin-top: 20px;
+                padding: 20px;
+            }
+
+            .search-header h1 {
+                font-size: 2em;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .article-card {
+                padding: 20px;
+            }
+
+            .article-title {
+                padding-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .article-topic {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin-bottom: 15px;
+                display: inline-block;
+            }
+        }
+
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">⬅️ Back to Home</a>
+
+    <div class="search-header">
+        <h1>🔍 Search News</h1>
+        <div class="search-box-container">
+            <form action="/search" method="GET">
+                <input type="text" name="q" class="search-box" 
+                       placeholder="Search articles..." 
+                       value="{{ query }}" 
+                       autocomplete="off" 
+                       autofocus>
+                <button type="submit" class="search-btn">🔍</button>
+            </form>
+        </div>
+        {% if query %}
+        <div class="search-info">
+            <p>Searching for: <strong>"{{ query }}"</strong></p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="results-container">
+        {% if query %}
+            <div class="results-header">
+                <h2>📊 Search Results</h2>
+                <p>Found {{ total }} articles matching "{{ query }}"</p>
+            </div>
+
+            {% if results %}
+                <div class="results-grid">
+                    {% for article in results %}
+                    <div class="article-card">
+                        <div class="article-topic">{{ article.topic_name }}</div>
+                        
+                        <div class="article-source">{{ article.feed_name }}</div>
+                        
+                        <h2 class="article-title">
+                            <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer">
+                                {{ article.title }}
+                            </a>
+                        </h2>
+                        
+                        <p class="article-summary">{{ article.summary }}</p>
+                        
+                        <div class="article-actions">
+                            <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer" class="read-more">
+                                📖 Read Article
+                            </a>
+                            <a href="/topic/{{ article.topic }}" class="topic-link">
+                                📂 More {{ article.topic_name }}
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-results">
+                    <h2>🔍 No Results Found</h2>
+                    <p>We couldn't find any articles matching "<strong>{{ query }}</strong>"</p>
+                    
+                    <div class="search-suggestions">
+                        <h3>💡 Try searching for:</h3>
+                        <div class="suggestion-tags">
+                            <a href="/search?q=technology" class="suggestion-tag">Technology</a>
+                            <a href="/search?q=programming" class="suggestion-tag">Programming</a>
+                            <a href="/search?q=python" class="suggestion-tag">Python</a>
+                            <a href="/search?q=AI" class="suggestion-tag">AI</a>
+                            <a href="/search?q=startup" class="suggestion-tag">Startup</a>
+                            <a href="/search?q=science" class="suggestion-tag">Science</a>
+                            <a href="/search?q=business" class="suggestion-tag">Business</a>
+                            <a href="/search?q=news" class="suggestion-tag">News</a>
+                        </div>
+                        
+                        <div style="margin-top: 30px;">
+                            <h3>🏠 Or browse by topic:</h3>
+                            <div class="suggestion-tags">
+                                <a href="/topic/technology" class="suggestion-tag">💻 Technology</a>
+                                <a href="/topic/programming" class="suggestion-tag">👨‍💻 Programming</a>
+                                <a href="/topic/science" class="suggestion-tag">🔬 Science</a>
+                                <a href="/topic/business" class="suggestion-tag">💼 Business</a>
+                                <a href="/topic/world" class="suggestion-tag">🌍 World News</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="no-results">
+                <h2>🔍 Search News Articles</h2>
+                <p>Enter keywords to search across all news sources and topics</p>
+                
+                <div class="search-suggestions">
+                    <h3>🔥 Popular searches:</h3>
+                    <div class="suggestion-tags">
+                        <a href="/search?q=artificial intelligence" class="suggestion-tag">Artificial Intelligence</a>
+                        <a href="/search?q=cryptocurrency" class="suggestion-tag">Cryptocurrency</a>
+                        <a href="/search?q=machine learning" class="suggestion-tag">Machine Learning</a>
+                        <a href="/search?q=web development" class="suggestion-tag">Web Development</a>
+                        <a href="/search?q=climate change" class="suggestion-tag">Climate Change</a>
+                        <a href="/search?q=space exploration" class="suggestion-tag">Space Exploration</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                window.location.href = '/';
+            }
+            if (event.key === '/' && event.ctrlKey) {
+                event.preventDefault();
+                document.querySelector('.search-box').focus();
+                document.querySelector('.search-box').select();
+            }
+        });
+
+        // Auto-focus search box
+        window.addEventListener('load', function() {
+            const searchBox = document.querySelector('.search-box');
+            if (!searchBox.value) {
+                searchBox.focus();
+            }
+        });
+
+        // Add entrance animation
+        window.addEventListener('load', function() {
+            const cards = document.querySelectorAll('.article-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'all 0.6s ease';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html> 
